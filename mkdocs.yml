@@ -1,0 +1,13 @@
+site_name: Haiker技术博客
+site_description: 你。认真。啦。技术博客
+site_author: Haiker
+site_url: https://ni.renzhen.la
+repo_url: https://github.com/ihaiker/ni.renzhen.la
+copyright: Copyright @2021 Haiker
+
+theme:
+  name: readthedocs
+  navigation_depth: 1
+
+extra_css:
+  - extra.css
