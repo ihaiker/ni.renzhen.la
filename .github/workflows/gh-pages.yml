@@ -14,8 +14,13 @@ jobs:
       - name: Checkout main
         uses: actions/checkout@v2
 
-      - name: build docs
-        run: make mkdocs
+#      - name: build docs
+#        run: make mkdocs
+
+      - name: run docker-compose
+          uses: sudo-bot/action-docker-compose@latest
+          with:
+            cli-args: "run --rm mkdocs build -c"
 
       - name: deploy docs
         uses: crazy-max/ghaction-github-pages@v2
