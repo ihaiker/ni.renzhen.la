@@ -20,7 +20,7 @@ jobs:
       - name: run docker-compose
         uses: sudo-bot/action-docker-compose@latest
         with:
-          cli-args: "run --rm mkdocs build -c"
+          cli-args: "up"
 
       - name: deploy docs
         uses: crazy-max/ghaction-github-pages@v2
