@@ -18,7 +18,7 @@ jobs:
 #        run: make mkdocs
 
       - name: run docker-compose
-          uses: sudo-bot/action-docker-compose@latest
+          uses: sudo-bot/action-docker-compose@1.29.2
           with:
             cli-args: "run --rm mkdocs build -c"
 
