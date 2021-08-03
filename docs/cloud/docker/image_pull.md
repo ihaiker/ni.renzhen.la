@@ -291,3 +291,19 @@ $ chmod +x docker-wrapper.py
 $ sudo mv docker-wrapper.py /usr/local/bin/
 $ docker-wrapper.py pull xxx/yyy:zzz
 ```
+
+
+
+
+## Docker Hub 镜像加速器列表
+
+|镜像加速器|镜像加速器地址|专属加速器？|其它加速？|
+|:---|---|---|---|
+|Docker 中国官方镜像|https://registry.docker-cn.com|Docker Hub||
+|DaoCloud 镜像站|http://f1361db2.m.daocloud.io|可登录，系统分配|Docker Hub|
+|Azure 中国镜像|https://dockerhub.azk8s.cn|Docker Hub、GCR、Quay||
+|科大镜像站|https://docker.mirrors.ustc.edu.cn|Docker Hub、GCR、Quay||
+|阿里云|https://<your_code>.mirror.aliyuncs.com|需登录，系统分配|Docker Hub|
+|七牛云|https://reg-mirror.qiniu.com||Docker Hub、GCR、Quay|
+|网易云|https://hub-mirror.c.163.com||Docker Hub|
+|腾讯云|https://mirror.ccs.tencentyun.com||Docker Hub|
