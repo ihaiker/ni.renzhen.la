@@ -1,6 +1,5 @@
 ---
-tilte: mysql varchar  length 对性能影响分析
-order: 1
+title: mysql varchar  length 对性能影响分析
 ---
 
 
