@@ -45,7 +45,11 @@ Disruptor论文中讲述了一个实验：
 -   机器环境：2.4G 6核
 -   运算： 64位的计数器累加5亿次
 
-|Method | Time (ms) | |— | —| |Single thread | 300| |Single thread with CAS | 5,700| |Single thread with lock | 10,000| |Single thread with volatile write | 4,700| |Two threads with CAS | 30,000| |Two threads with lock | 224,000|
+| Method                  | Time (ms) |      | —                                 | —       |
+| ----------------------- | --------- | ---- | --------------------------------- | ------- |
+| Single thread           | 300       |      | Single thread with CAS            | 5,700   |
+| Single thread with lock | 10,000    |      | Single thread with volatile write | 4,700   |
+| Two threads with CAS    | 30,000    |      | Two threads with lock             | 224,000 |
 
 CAS操作比单线程无锁慢了1个数量级；有锁且多线程并发的情况下，速度比单线程无锁慢3个数量级。可见无锁速度最快。
 
