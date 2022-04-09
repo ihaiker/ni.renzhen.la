@@ -11,3 +11,14 @@ theme:
 
 extra_css:
   - extra.css
+nav: 
+  - '效果不错的HTML': template.md 
+  - '主页': index.md 
+  - '编程语言': language 
+  - '云服务': cloud 
+  - 'framework': framework 
+  - 'knowledge': knowledge 
+  - '管理工具': management 
+  - '数据库': database 
+  - '工具': tools 
+  - '关于我们': about.md 
