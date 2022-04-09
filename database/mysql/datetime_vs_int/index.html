@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="author" content="Haiker" /><link rel="canonical" href="https://ni.renzhen.la/database/mysql/datetime_vs_int/" />
+      <link rel="shortcut icon" href="../../../img/favicon.ico" />
+    <title>mysql datetime和int分析对比 - Haiker技术博客</title>
+    <link rel="stylesheet" href="../../../css/theme.css" />
+    <link rel="stylesheet" href="../../../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/styles/github.min.css" />
+        <link href="../../../extra.css" rel="stylesheet" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "mysql datetime\u548cint\u5206\u6790\u5bf9\u6bd4";
+        var mkdocs_page_input_path = "database/mysql/datetime_vs_int.md";
+        var mkdocs_page_url = "/database/mysql/datetime_vs_int/";
+      </script>
+    
+    <script src="../../../js/jquery-3.6.0.min.js" defer></script>
+    <!--[if lt IE 9]>
+      <script src="../../../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/highlight.min.js"></script>
+      <script>hljs.initHighlightingOnLoad();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href="../../.." class="icon icon-home"> Haiker技术博客
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../../template/">效果不错的HTML</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../..">主页</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="" href="../../../language">编程语言</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="" href="../../../cloud">云服务</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="" href="../../../framework">framework</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="" href="../../../knowledge">knowledge</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="" href="../../../management">管理工具</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="" href="../..">数据库</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="" href="../../../tools">工具</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../../about/">关于我们</a>
+                </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../..">Haiker技术博客</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../../.." class="icon icon-home" alt="Docs"></a> &raquo;</li><li>mysql datetime和int分析对比</li>
+    <li class="wy-breadcrumbs-aside">
+        <a href="https://github.com/ihaiker/ni.renzhen.la/edit/master/docs/database/mysql/datetime_vs_int.md"
+          class="icon icon-github"> Edit on GitHub</a>
+    </li>
+  </ul>
+  <hr/>
+</div>
+
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <p>https://blog.csdn.net/riemann_/article/details/100679675</p>
+<p>一、三者的区别
+1、int</p>
+<p>占用4个字节
+建立索引之后，查询速度快
+条件范围搜索可以使用使用between
+不能使用mysql提供的时间函数
+结论：适合需要进行大量时间范围查询的数据表</p>
+<p>2、datetime</p>
+<p>占用8个字节
+允许为空值，可以自定义值，系统不会自动修改其值
+实际格式储存（Just stores what you have stored and retrieves the same thing which you have stored.）
+与时区无关（It has nothing to deal with the TIMEZONE and Conversion.）
+可以在指定datetime字段的值的时候使用now()变量来自动插入系统的当前时间
+datetime是可以设置默认值的, DEFAULT CURRENT_TIMESTAMP在mysql5.7中亲测可用
+结论：datetime类型适合用来记录数据的原始的创建时间，因为无论你怎么更改记录中其他字段的值，datetime字段的值都不会改变，除非你手动更改它。</p>
+<p>3、timestamp</p>
+<p>占用4个字节
+允许为空值，但是不可以自定义值，所以为空值时没有任何意义
+TIMESTAMP值不能早于1970或晚于2037。这说明一个日期，例如’1968-01-01’，虽然对于DATETIME或DATE值是有效的，但对于TIMESTAMP值却无效，如果分配给这样一个对象将被转换为0。
+值以UTC格式保存（ it stores the number of milliseconds）
+时区转化 ，存储时对当前的时区进行转换，检索时再转换回当前的时区
+默认值为CURRENT_TIMESTAMP()，其实也就是当前的系统时间
+数据库会自动修改其值，所以在插入记录时不需要指定timestamp字段的名称和timestamp字段的值，你只需要在设计表的时候添加一个timestamp字段即可，插入后该字段的值会自动变为当前系统时间
+默认情况下以后任何时间修改表中的记录时，对应记录的timestamp值会自动被更新为当前的系统时间
+如果需要可以设置timestamp不自动更新。通过设置DEFAULT CURRENT_TIMESTAMP 可以实现
+修改自动更新
+field_time timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE
+修改不自动更新
+field_time timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
+结论：timestamp类型适合用来记录数据的最后修改时间，因为只要你更改了记录中其他字段的值，timestamp字段的值都会被自动更新。（如果需要可以设置timestamp不自动更新）</p>
+<p>二、MySQL中如何表示当前时间？
+其实，表达方式还是蛮多的，汇总如下：</p>
+<p>CURRENT_TIMESTAMP</p>
+<p>CURRENT_TIMESTAMP()</p>
+<p>NOW()</p>
+<p>LOCALTIME</p>
+<p>LOCALTIME()</p>
+<p>LOCALTIMESTAMP</p>
+<p>LOCALTIMESTAMP()</p>
+<p>三、关于timestamp和datetime的比较
+一个完整的日期格式如下：YYYY-MM-DD HH:MM:SS[.fraction]，它可分为两部分：date部分和time部分，其中，date部分对应格式中的“YYYY-MM-DD”，time部分对应格式中的“HH:MM:SS[.fraction]”。对于date字段来说，它只支持date部分，如果插入了time部分的内容，它会丢弃掉该部分的内容，并提示一个warning。</p>
+<p>1、关于update_time设置成date类型</p>
+<p>insert into user(update_time) values('20190909000000');
+1</p>
+<p>date后面的time部分都丢弃掉了。</p>
+<p>2、timestamp和datetime的相同点</p>
+<p>两者都可用来表示YYYY-MM-DD HH:MM:SS[.fraction]类型的日期。</p>
+<p>3、timestamp和datetime的不同点</p>
+<p>（1）、两者的存储方式不一样</p>
+<p>对于TIMESTAMP，它把客户端插入的时间从当前时区转化为UTC（世界标准时间）进行存储。查询时，将其又转化为客户端当前时区进行返回。</p>
+<p>而对于DATETIME，不做任何改变，基本上是原样输入和输出。</p>
+<p>下面，我们来验证一下</p>
+<p>首先创建两种测试表，一个使用timestamp格式，一个使用datetime格式。</p>
+<p>user表 datetime类型</p>
+<p>user2表 timestamp类型</p>
+<p>insert into user(id, update_time) values(1, '20190910000800');
+insert into user2(id, update_time) values(1, '20190910000800');</p>
+<p>select * from user;
+select * from user2;
+1
+2
+3
+4
+5</p>
+<p>两者输出是一样的。</p>
+<p>其次修改当前会话的时区</p>
+<p>show variables like '%time_zone%'; 
+1</p>
+<p>set time_zone='+0:00';
+1
+select * from user;
+select * from user2;
+1
+2</p>
+<p>“CST”指的是MySQL所在主机的系统时间，是中国标准时间的缩写，China Standard Time UT+8:00，这里system_time_zone为空。</p>
+<p>通过结果可以看出，user2中返回的时间提前了8个小时，而user中时间则不变。这充分验证了两者的区别。</p>
+<p>（2）、两者所能存储的时间范围不一样</p>
+<p>timestamp所能存储的时间范围为：'1970-01-01 00:00:01.000000' 到 '2038-01-19 03:14:07.999999'。</p>
+<p>datetime所能存储的时间范围为：'1000-01-01 00:00:00.000000' 到 '9999-12-31 23:59:59.999999'。</p>
+<p>总结：timestamp和datetime除了存储范围和存储方式不一样，没有太大区别。当然，对于跨时区的业务，timestamp更为合适。</p>
+<p>四、关于timestamp和datetime的自动初始化和更新
+首先，我们来看下面的操作：</p>
+<p>mysql&gt; create table user3(id int, update_time timestam
+Query OK, 0 rows affected (0.02 sec)</p>
+<p>mysql&gt; insert into user3(id) values(1);
+Query OK, 1 row affected (0.00 sec)</p>
+<p>mysql&gt; select * from user3;
++------+---------------------+
+| id   | update_time         |
++------+---------------------+
+|    1 | 2019-09-10 00:37:57 |
++------+---------------------+
+1 row in set (0.00 sec)</p>
+<p>mysql&gt; show create table user3\G
+<strong><em>*</em></strong><strong><em>*</em></strong><strong><em>*</em></strong><strong><em>*</em>* 1. row </strong><strong><em>*</em></strong><strong><em>*</em></strong>***
+       Table: user3
+Create Table: CREATE TABLE <code>user3</code> (
+  <code>id</code> int(11) default NULL,
+  <code>update_time</code> timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8
+1 row in set (0.00 sec)</p>
+<p>看起来是不是有点奇怪，我并没有对update_time字段进行插入操作，它的值自动修改为当前值，而且在创建表的时候，我也并没有定义“show create table test\G”结果中显示的“ default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP”。</p>
+<p>其实，这个特性是自动初始化和自动更新（Automatic Initialization and Updating）。</p>
+<p>自动初始化指的是如果对该字段（譬如上例中的update_time字段）没有显性赋值，则自动设置为当前系统时间。</p>
+<p>自动更新指的是如果修改了其它字段，则该字段的值将自动更新为当前系统时间。</p>
+<p>它与“explicit_defaults_for_timestamp”参数有关。</p>
+<p>默认情况下，该参数的值为OFF，如下所示：</p>
+<p>mysql&gt; show variables like '%explicit_defaults_for_timestamp%';
++---------------------------------+-------+
+| Variable_name                   | Value |
++---------------------------------+-------+
+| explicit_defaults_for_timestamp | OFF   |
++---------------------------------+-------+
+row in set (0.00 sec)</p>
+<p>下面我们看看官档的说明：</p>
+<p>By default, the first TIMESTAMP column has both DEFAULT CURRENT_TIMESTAMP and ON UPDATE CURRENT_TIMESTAMP if neither is specified explicitly。</p>
+<p>很多时候，这并不是我们想要的，如何禁用呢？</p>
+<p>将“explicit_defaults_for_timestamp”的值设置为ON。</p>
+<p>“explicit_defaults_for_timestamp”的值依旧是OFF，也有两种方法可以禁用</p>
+<p>&lt;1&gt; 用DEFAULT子句该该列指定一个默认值</p>
+<p>&lt;2&gt; 为该列指定NULL属性。</p>
+<p>如下所示：</p>
+<p>mysql&gt; create table user4(id int, update_time timestamp null);
+Query OK, 0 rows affected (0.01 sec)</p>
+<p>mysql&gt; show create table user4\G
+<strong><em>*</em></strong><strong><em>*</em></strong><strong><em>*</em></strong><strong><em>*</em>* 1. row </strong><strong><em>*</em></strong><strong><em>*</em></strong><strong><em>*</em></strong>****
+       Table: user4
+Create Table: CREATE TABLE <code>user4</code> (
+  <code>id</code> int(11) DEFAULT NULL,
+  <code>update_time</code> timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf-8
+row in set (0.00 sec)</p>
+<p>mysql&gt; create table user5(id int,update_time timestamp default 0);
+Query OK, 0 rows affected (0.01 sec)</p>
+<p>mysql&gt; show create table user5\G
+<strong><em>*</em></strong><strong><em>*</em></strong><strong><em>*</em></strong><strong><em>*</em>* 1. row </strong><strong><em>*</em></strong><strong><em>*</em></strong><strong><em>*</em></strong>****
+       Table: user5
+Create Table: CREATE TABLE <code>user5</code> (
+  <code>id</code> int(11) DEFAULT NULL,
+  <code>update_time</code> timestamp NOT NULL DEFAULT '0000-00-00 00:00:00'
+) ENGINE=InnoDB DEFAULT CHARSET=utf-8
+row in set (0.00 sec)</p>
+<p>在MySQL 5.6.5版本之前，Automatic Initialization and Updating只适用于TIMESTAMP，而且一张表中，最多允许一个TIMESTAMP字段采用该特性。从MySQL 5.6.5开始，Automatic Initialization and Updating同时适用于TIMESTAMP和DATETIME，且不限制数量。</p>
+<hr />
+<p>版权声明：本文为CSDN博主「老周聊架构」的原创文章，遵循CC 4.0 BY-SA版权协议，转载请附上原文出处链接及本声明。
+原文链接：https://blog.csdn.net/riemann_/article/details/100679675</p>
+              
+            </div>
+          </div><footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+      <p>Copyright @2021 Haiker</p>
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+        <span>
+          <a href="https://github.com/ihaiker/ni.renzhen.la" class="fa fa-github" style="color: #fcfcfc"> GitHub</a>
+        </span>
+    
+    
+    
+  </span>
+</div>
+    <script>var base_url = '../../..';</script>
+    <script src="../../../js/theme_extra.js" defer></script>
+    <script src="../../../js/theme.js" defer></script>
+      <script src="../../../search/main.js" defer></script>
+    <script defer>
+        window.onload = function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        };
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="author" content="Haiker" /><link rel="canonical" href="https://ni.renzhen.la/language/rust/MACOS/" />
+      <link rel="shortcut icon" href="../../../img/favicon.ico" />
+    <title>Cross compiling Rust from Linux to macOS - Haiker技术博客</title>
+    <link rel="stylesheet" href="../../../css/theme.css" />
+    <link rel="stylesheet" href="../../../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/styles/github.min.css" />
+        <link href="../../../extra.css" rel="stylesheet" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Cross compiling Rust from Linux to macOS";
+        var mkdocs_page_input_path = "language/rust/MACOS.md";
+        var mkdocs_page_url = "/language/rust/MACOS/";
+      </script>
+    
+    <script src="../../../js/jquery-3.6.0.min.js" defer></script>
+    <!--[if lt IE 9]>
+      <script src="../../../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/highlight.min.js"></script>
+      <script>hljs.initHighlightingOnLoad();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href="../../.." class="icon icon-home"> Haiker技术博客
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../../template/">效果不错的HTML</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../..">主页</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="" href="../..">编程语言</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="" href="../../../cloud">云服务</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="" href="../../../framework">framework</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="" href="../../../knowledge">knowledge</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="" href="../../../management">管理工具</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="" href="../../../database">数据库</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="" href="../../../tools">工具</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../../about/">关于我们</a>
+                </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../..">Haiker技术博客</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../../.." class="icon icon-home" alt="Docs"></a> &raquo;</li><li>Cross compiling Rust from Linux to macOS</li>
+    <li class="wy-breadcrumbs-aside">
+        <a href="https://github.com/ihaiker/ni.renzhen.la/edit/master/docs/language/rust/MACOS.md"
+          class="icon icon-github"> Edit on GitHub</a>
+    </li>
+  </ul>
+  <hr/>
+</div>
+
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="cross-compiling-rust-from-linux-to-macos">Cross compiling Rust from Linux to macOS</h1>
+<p><a href="https://wapl.es/rust/2019/02/17/rust-cross-compile-linux-to-macos.html">February 17, 2019</a></p>
+<p>I’ve recently been working on a Rust project at <a href="https://repositive.io/">work</a> which requires compiling for Linux (GNU), Linux (musl - for Alpine Linux) and macOS. I use Linux Mint nearly all the time, so building for macOS targets has required asking very nicely to borrow a spare Macbook Air. This is naturally a bit crap, so I set out to find a Linux-only solution to cross compile for macOS using <a href="https://github.com/tpoechtrager/osxcross">osxcross</a>. A weekend of pain later, and I have the following post. Hopefully it spares you a weekend of your own pain.</p>
+<h2 id="environment">Environment</h2>
+<p>This process should work in any modern-ish Debian-based environment. This is the setup I used:</p>
+<ul>
+<li>Linux Mint 19.1, Dell XPS1 15, Intel i9 x64</li>
+<li>Rust 1.32.0 (with <a href="http://rustup.rs/">Rustup</a>)</li>
+<li>Clang 6.0.0</li>
+</ul>
+<p>I’ve also tested this process in <a href="http://circleci.com/">CircleCI</a> and it seems to be working fine.</p>
+<p>The only device I have to test on at time of writing is a Macbook Air with macOS Mojave on it. This process <strong>should</strong> work for other macOS versions, but is untested.</p>
+<h2 id="requirements">Requirements</h2>
+<p>There are a few system dependencies required to work with osxcross. I don’t think the version requirements are too strict for the packages listed below. You may want to check the <a href="https://github.com/tpoechtrager/osxcross#installation">osxcross requirements</a> as well if you’re having problems.</p>
+<pre><code># Install build dependencies
+apt install \
+    clang \
+    gcc \
+    g++ \
+    zlib1g-dev \
+    libmpc-dev \
+    libmpfr-dev \
+    libgmp-dev
+
+# Add macOS Rust target
+rustup target add x86_64-apple-darwin
+</code></pre>
+<h2 id="building-osxcross">Building osxcross</h2>
+<p>The following process is based on <a href="https://www.reddit.com/r/rust/comments/6rxoty/tutorial_cross_compiling_from_linux_for_osx/">this tutorial on Reddit</a> and some trial and error. I’m using the macOS 10.10 SDK as I had the least problems getting up and running with it.</p>
+<p>Add the following to a script called <code>osxcross_setup.sh</code> and make it executable.</p>
+<pre><code>git clone https://github.com/tpoechtrager/osxcross
+cd osxcross
+wget -nc https://s3.dockerproject.org/darwin/v2/MacOSX10.10.sdk.tar.xz
+mv MacOSX10.10.sdk.tar.xz tarballs/
+UNATTENDED=yes OSX_VERSION_MIN=10.7 ./build.sh
+</code></pre>
+<p>Not a lot to it, thanks to the hard work put in by the osxcross developers. Running <code>./osxcross_setup.sh</code> should create a folder named <code>osxcross</code> with everything you need in it to cross compile to macOS with Clang. This doesn’t modify <code>$PATH</code> or install any system files, so is useful for CI as well.</p>
+<p><em>Append <code>./build_gcc.sh</code> to <code>osxcross_setup.sh</code> if you want to use GCC to cross compile.</em></p>
+<h2 id="configuring-cargo">Configuring Cargo</h2>
+<p>Cargo needs to be told to use the correct linker for the <code>x86_64-apple-darwin</code> target, so add the following to your project’s <code>.cargo/config</code> file:</p>
+<pre><code>[target.x86_64-apple-darwin]
+linker = &quot;x86_64-apple-darwin14-clang&quot;
+ar = &quot;x86_64-apple-darwin14-ar&quot;
+</code></pre>
+<p>If you’ve used a different macOS SDK version, you might need to replace <code>darwin14</code> with <code>darwin15</code>. To check what binary to use, look in <code>osxcross/target/bin</code>.</p>
+<h2 id="building-the-project">Building the project</h2>
+<p>Because I chose not to install osxcross at the system level, the <code>$PATH</code> variable must be modified for Cargo to pick up the linker binaries specified previously. The build command changes to:</p>
+<pre><code># Add --release to build in release mode
+PATH=&quot;$(pwd)/osxcross/target/bin:$PATH&quot; \
+cargo build --target x86_64-apple-darwin
+</code></pre>
+<p>This adds <code>[pwd]/osxcross/target/bin</code> to <code>$PATH</code>, which means the linker binaries should get picked up. The path must be absolute to work properly, hence <code>$(pwd)</code>.</p>
+<p>Now you should have a binary in <code>target/x86_64-apple-darwin/[debug|release]</code> which works on macOS!</p>
+<h2 id="building-sys-crates">Building <code>*-sys</code> crates</h2>
+<p>You can stop here if none of your crates require any C bindings to function. Quite a few of them do, so read on if you run into compilation or linking errors.</p>
+<p>The project I’m cross compiling uses the <a href="https://crates.io/crates/git2">git2</a> crate which has <a href="https://github.com/rust-lang/libz-sys/">libz-sys</a> in its dependency tree. Unfortunately this means digging out a C compiler. The build uses the <em>host</em> system compiler by default, so the architectures for the final binary (target arch) and these linked libraries (host arch) don’t match up.</p>
+<p>The solution to this is to set the <code>CC</code> and <code>CXX</code> environment variables in our build command:</p>
+<pre><code>PATH=&quot;$(pwd)/osxcross/target/bin:$PATH&quot; \
+CC=o64-clang \
+CXX=o64-clang++ \
+cargo build --target x86_64-apple-darwin
+</code></pre>
+<p>This uses <code>o64-clang</code> and <code>o64-clang++</code> in <code>osxcross/target/bin</code>.</p>
+<p>Now git2 compiles, but fails to link! This is due to the fact that libz-sys attempts to link to the host system <code>zlib</code> library. Because I’m building on a Linux machine, this is a Linux-native library which won’t work on macOS.</p>
+<p>Luckily, libz-sys supports building its own statically linked version of zlib. According to <a href="https://github.com/rust-lang/libz-sys/blob/master/build.rs#L25">libz-sys’ <code>build.rs</code></a>, if <code>LIBZ_SYS_STATIC=1</code> is set in the environment a bundled version of zlib will be built. Because we set <code>CC</code> and <code>CXX</code>, this statically linked code will be compiled for a macOS target. The full build command ends up looking like this:</p>
+<pre><code>PATH=&quot;$(pwd)/osxcross/target/bin:$PATH&quot; \
+CC=o64-clang \
+CXX=o64-clang++ \
+LIBZ_SYS_STATIC=1 \
+cargo build --target x86_64-apple-darwin
+</code></pre>
+<h2 id="ci">CI</h2>
+<p>I got the above process working in CircleCI, but it should be pretty easy to get any Debian-based CI service to work.</p>
+<p>It should be possible to cache the <code>osxcross</code> folder so it doesn’t have to be built for every job. The cache should be invalidated when your build script(s) change. For example, I use the cache checksum <code>project-v1-</code> to ensure the <code>osxcross</code> folder is regenerated correctly.</p>
+<h2 id="wrapping-up">Wrapping up</h2>
+<p>The final build command is pretty long, so I’d suggest putting it in a script. In my case, I have a build script containing the following snippet:</p>
+<pre><code># ... snip ...
+
+MACOS_TARGET=&quot;x86_64-apple-darwin&quot;
+
+echo &quot;Building target for platform ${MACOS_TARGET}&quot;
+echo
+
+# Add osxcross toolchain to path
+export PATH=&quot;$(pwd)/osxcross/target/bin:$PATH&quot;
+
+# Make libz-sys (git2-rs -&gt; libgit2-sys -&gt; libz-sys) build as a statically linked lib
+# This prevents the host zlib from being linked
+export LIBZ_SYS_STATIC=1
+
+# Use Clang for C/C++ builds
+export CC=o64-clang
+export CXX=o64-clang++
+
+cargo build --release --target &quot;${MACOS_TARGET}&quot;
+
+echo
+echo Done
+</code></pre>
+<p>Now you can just run <code>./osxcross_setup.sh</code> and <code>./build_macos.sh</code> in your CI.</p>
+<p><a href="http://twitter.com/share?text=Cross compiling Rust from Linux to macOS&amp;url=/rust/2019/02/17/rust-cross-compile-linux-to-macos.html">Comment on The Twittuhs ↗</a></p>
+              
+            </div>
+          </div><footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+      <p>Copyright @2021 Haiker</p>
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+        <span>
+          <a href="https://github.com/ihaiker/ni.renzhen.la" class="fa fa-github" style="color: #fcfcfc"> GitHub</a>
+        </span>
+    
+    
+    
+  </span>
+</div>
+    <script>var base_url = '../../..';</script>
+    <script src="../../../js/theme_extra.js" defer></script>
+    <script src="../../../js/theme.js" defer></script>
+      <script src="../../../search/main.js" defer></script>
+    <script defer>
+        window.onload = function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        };
+    </script>
+
+</body>
+</html>

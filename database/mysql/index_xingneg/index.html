@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="author" content="Haiker" /><link rel="canonical" href="https://ni.renzhen.la/database/mysql/index_xingneg/" />
+      <link rel="shortcut icon" href="../../../img/favicon.ico" />
+    <title>MySQL外键对性能影响 - Haiker技术博客</title>
+    <link rel="stylesheet" href="../../../css/theme.css" />
+    <link rel="stylesheet" href="../../../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/styles/github.min.css" />
+        <link href="../../../extra.css" rel="stylesheet" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "MySQL\u5916\u952e\u5bf9\u6027\u80fd\u5f71\u54cd";
+        var mkdocs_page_input_path = "database/mysql/index_xingneg.md";
+        var mkdocs_page_url = "/database/mysql/index_xingneg/";
+      </script>
+    
+    <script src="../../../js/jquery-3.6.0.min.js" defer></script>
+    <!--[if lt IE 9]>
+      <script src="../../../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/highlight.min.js"></script>
+      <script>hljs.initHighlightingOnLoad();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href="../../.." class="icon icon-home"> Haiker技术博客
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../../template/">效果不错的HTML</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../..">主页</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="" href="../../../language">编程语言</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="" href="../../../cloud">云服务</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="" href="../../../framework">framework</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="" href="../../../knowledge">knowledge</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="" href="../../../management">管理工具</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="" href="../..">数据库</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="" href="../../../tools">工具</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../../about/">关于我们</a>
+                </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../..">Haiker技术博客</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../../.." class="icon icon-home" alt="Docs"></a> &raquo;</li><li>MySQL外键对性能影响</li>
+    <li class="wy-breadcrumbs-aside">
+        <a href="https://github.com/ihaiker/ni.renzhen.la/edit/master/docs/database/mysql/index_xingneg.md"
+          class="icon icon-github"> Edit on GitHub</a>
+    </li>
+  </ul>
+  <hr/>
+</div>
+
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <p>In MySQL, a foreign key requires an index. If an index already exists, the foreign key will use that index (even using the prefix of an existing multi-column index). If no index exists, defining the foreign key will build the index.</p>
+<p>So the size increase and time to create a foreign key is about the same as to create an index on the same column(s).</p>
+<p>The performance of a SELECT is not impacted significantly by the presence of a foreign key. Only a slight additional work for the optimizer, to consider the new indexes.</p>
+<p>The performance of updating is more, because for each foreign key, an INSERT/UPDATE/DELETE has to check to see if the constraint is satisfied. That means a primary key lookup to the referenced tables. This impact is measurable, and it is greater if the referenced tables are not in the buffer pool.</p>
+<p>Another impact is the locking. If I update a row in a child row that has a foreign key, InnoDB places a shared-lock on the referenced rows in the parent tables. That means no one can update those parent rows until I commit. If you have lots of threads updating child rows, then the parent rows may be locked most of the time, and this can make it hard to do concurrent work in the parent tables. Not so much a performance problem, but a concurrency problem.</p>
+<p>As with all "how does that perform" questions, the answer really depends on your workload. If you don't have concurrent updates, for example, that issue may not effect you for all practical purposes. Testing it yourself with load testing is the only way to be sure. It's not something anyone on StackOverflow can answer precisely for you.</p>
+<p>读后小结：</p>
+<p>1.外键就想其他类型的索引一样，要说性能方面的影响，它影响的主要是写入操作(如，UPDATE/INSERT/DELETE)；</p>
+<p>2.但它与单表索引不同的是，它会引用一张或多张父表，这样当对子表进行写入操作(UPDATE/INSERT)的时候，父表就会被加上“共享锁”，这样在对子表高并发进行写入操作的情况下，对父表的写入操作就会由于“共享锁”的存在，而会长时间不能得到更新！当然查询是可以的。</p>
+<p>3.作者给出了一个观点：外键主要造成的问题，并不是影响性能多少的问题，而是一个并发访问的问题！</p>
+<p>4.所以是否使用外键，关键是要看你对并发要求的高低了！</p>
+              
+            </div>
+          </div><footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+      <p>Copyright @2021 Haiker</p>
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+        <span>
+          <a href="https://github.com/ihaiker/ni.renzhen.la" class="fa fa-github" style="color: #fcfcfc"> GitHub</a>
+        </span>
+    
+    
+    
+  </span>
+</div>
+    <script>var base_url = '../../..';</script>
+    <script src="../../../js/theme_extra.js" defer></script>
+    <script src="../../../js/theme.js" defer></script>
+      <script src="../../../search/main.js" defer></script>
+    <script defer>
+        window.onload = function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        };
+    </script>
+
+</body>
+</html>

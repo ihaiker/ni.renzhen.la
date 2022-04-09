@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="author" content="Haiker" /><link rel="canonical" href="https://ni.renzhen.la/cloud/clusters/etcd/" />
+      <link rel="shortcut icon" href="../../../img/favicon.ico" />
+    <title>ETCD集群安装 - Haiker技术博客</title>
+    <link rel="stylesheet" href="../../../css/theme.css" />
+    <link rel="stylesheet" href="../../../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/styles/github.min.css" />
+        <link href="../../../extra.css" rel="stylesheet" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "ETCD\u96c6\u7fa4\u5b89\u88c5";
+        var mkdocs_page_input_path = "cloud/clusters/etcd.md";
+        var mkdocs_page_url = "/cloud/clusters/etcd/";
+      </script>
+    
+    <script src="../../../js/jquery-3.6.0.min.js" defer></script>
+    <!--[if lt IE 9]>
+      <script src="../../../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/highlight.min.js"></script>
+      <script>hljs.initHighlightingOnLoad();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href="../../.." class="icon icon-home"> Haiker技术博客
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../../template/">效果不错的HTML</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../..">主页</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="" href="../../../language">编程语言</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="" href="../..">云服务</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="" href="../../../framework">framework</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="" href="../../../knowledge">knowledge</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="" href="../../../management">管理工具</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="" href="../../../database">数据库</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="" href="../../../tools">工具</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../../about/">关于我们</a>
+                </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../..">Haiker技术博客</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../../.." class="icon icon-home" alt="Docs"></a> &raquo;</li><li>ETCD集群安装</li>
+    <li class="wy-breadcrumbs-aside">
+        <a href="https://github.com/ihaiker/ni.renzhen.la/edit/master/docs/cloud/clusters/etcd.md"
+          class="icon icon-github"> Edit on GitHub</a>
+    </li>
+  </ul>
+  <hr/>
+</div>
+
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="etcd">ETCD集群安装</h1>
+<p>etcd 目前默认使用 2379 端口提供 HTTP API 服务，2380 端口提供 Peer 通信（这两个端口已经被 IANA 官方预留给 etcd），在之前的版本中，可能会分别使用 4001 和 7001，在使用的过程中需要注意这个区别。</p>
+<p>虽然 etcd 也支持单点部署，但是在生产环境中推荐集群方式部署，一般 etcd 节点数会选择 3、5、7。etcd 会保证所有的节点都会保存数据，并保证数据的一致性和正确性。</p>
+<h2 id="_1">安装</h2>
+<h3 id="_2">编译安装</h3>
+<p>因为 etcd 是 Golang 编写的，安装只需要下载对应的二进制文件，并放到合适的路径就行。如果在测试环境，启动一个单点的 etcd 服务，只需要运行 etcd 执行即可。</p>
+<pre><code class="language-bash">git clone https://github.com/etcd-io/etcd.git
+cd etcd
+./build
+</code></pre>
+<p>使用 build 脚本构建会在当前项目的 bin 目录生产 etcd 和 etcdctl 可执行程序。<code>etcd</code>就是 etcd server，而 <code>etcdctl</code>主要为 etcd server 提供指令行操作。</p>
+<p>查看版本：</p>
+<pre><code class="language-bash">$ ./bin/etcd --version
+etcd Version: 3.5.0-pre
+Git SHA: ab4cc3cae
+Go Version: go1.14.4
+Go OS/Arch: darwin/amd64
+
+$ ./bin/etcdctl version
+etcdctl version: 3.5.0-pre
+API version: 3.5
+</code></pre>
+<h3 id="_3">直接下载二进制文件</h3>
+<p>为了方便下载最新版本使用下面脚本进行安装：</p>
+<pre><code class="language-shell">$ download_url=`curl -q https://api.github.com/repos/etcd-io/etcd/releases | jq -r '.[0].assets[].browser_download_url'  | grep $(uname -s) -i | head -n 1`
+$ wget $download_url
+</code></pre>
+<p>或者您直接下载: https://github.com/etcd-io/etcd/releases</p>
+<h3 id="docker">Docker 方式安装</h3>
+<p>docker 安装只需要pull下载相应的版本即可 <code>quay.io/coreos/etcd:v3.5.0</code> 。<a href="../../docker/image_pull/">国内加速参考</a></p>
+<h2 id="_4">单点部署</h2>
+<h3 id="_5">直接启动</h3>
+<pre><code class="language-shell">./bin/etcd -advertise-client-urls http://0.0.0.0:2379 -listen-client-urls http://0.0.0.0:2379
+</code></pre>
+<h3 id="_6">容器部署</h3>
+<pre><code class="language-shell">$ docker run --rm --name etcd -p 2379:2379 -e ETCDCTL_API=3 quay.io/coreos/etcd:v3.5.0 /usr/local/bin/etcd \
+        -advertise-client-urls http://0.0.0.0:2379 \
+        -listen-client-urls http://0.0.0.0:2379
+
+$ docker ps -f name=etcd
+
+$ docker exec -it etcd etcdctl version
+etcdctl version: 3.3.8
+API version: 3.3
+
+$ docker exec -it etcd etcdctl endpoint health
+127.0.0.1:2379 is healthy: successfully committed proposal: took = 571.723µs
+</code></pre>
+<h2 id="_7">关键启动参数清单说明</h2>
+<table>
+<thead>
+<tr>
+<th>参数名</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>-name</td>
+<td>指定 etcd node 名称，可以使用 hostname。</td>
+</tr>
+<tr>
+<td>–data-dir</td>
+<td>指定 etcd server 持久化数据存储目录路径。</td>
+</tr>
+<tr>
+<td>–snapshot-count</td>
+<td>指定有多少事务（transaction）被提交后，触发截取快照并持久化到磁盘。</td>
+</tr>
+<tr>
+<td>–heartbeat-interval</td>
+<td>指定 Leader 多久发送一次心跳到 Followers。</td>
+</tr>
+<tr>
+<td>–eletion-timeout</td>
+<td>指定重新投票的超时时间，如果 Follow 在该时间间隔没有收到 Leader 发出的心跳包，则会触发重新投票。</td>
+</tr>
+<tr>
+<td>–listen-peer-urls</td>
+<td>指定和 Cluster 其他 Node 通信的地址，比如：http://IP:2380，如果有多个，则使用逗号分隔。需要所有节点都能够访问，所以不要使用 localhost。</td>
+</tr>
+<tr>
+<td>–listen-client-urls</td>
+<td>指定对外提供服务的地址，比如：http://IP:2379,http://127.0.0.1:2379。</td>
+</tr>
+<tr>
+<td>–advertise-client-urls</td>
+<td>对外通告的该节点的客户端监听地址，会告诉集群中其他节点。</td>
+</tr>
+<tr>
+<td>–initial-advertise-peer-urls</td>
+<td>对外通告该节点的同伴（Peer）监听地址，这个值会告诉集群中其他节点。</td>
+</tr>
+<tr>
+<td>–initial-cluster</td>
+<td>指定集群中所有节点的信息，通常为 IP:Port 信息，格式为：node1=http://ip1:2380,node2=http://ip2:2380,…。注意，这里的 node1 就是 --name 指定的名字，ip1:2380 就是 --initial-advertise-peer-urls 指定的值。</td>
+</tr>
+<tr>
+<td>–initial-cluster-state</td>
+<td>新建集群时，这个值为 new；假如已经存在了集群，这个值为 existing。</td>
+</tr>
+<tr>
+<td>–initial-cluster-token</td>
+<td>创建集群的 token，这个值每个集群保持唯一。这样的话，如果你要重新创建集群，即使配置和之前一样，也会再次生成新的集群和节点 UUID；否则会导致多个集群之间的冲突，造成未知的错误。</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h2 id="_8">集群部署</h2>
+<p>etcd cluster 的部署，实际上就是多个主机上都部署 etcd server，然后将它们加入到一个 cluster 中。</p>
+<p><strong>注意：etcd cluster 必须具有时间同步服务器，否则会导致 Cluster 频繁进行 Leader Change。在 OpenShift 的 etcd cluster 中，会每隔 100ms 进行心跳检测。</strong></p>
+<p>在安装和启动 etcd 服务进程的时候，各个 Node 都需要知道 Cluster 中其他 Nodes 的信息，一般是 IP:Port 信息。</p>
+<p>根据用户是否提前知晓（规划）了每个 Node 的 IP 地址，有以下几种不同的集群部署方案：</p>
+<ul>
+<li>
+<p>1、静态配置</p>
+<p>在启动 etcd server 的时候，通过 --initial-cluster 参数配置好所有的节点信息。</p>
+</li>
+<li>
+<p>2、公开的发现服务</p>
+<p>注册到已有的 etcd cluster：比如官方提供的 <code>discovery.etcd.io</code></p>
+</li>
+</ul>
+<h4 id="1">1、静态配置集群</h4>
+<p>如果 etcd cluster 中的成员是已知的，且具有固定的 IP 地址，就可以静态的初始化一个集群。</p>
+<p>环境准备：三台主机（10.0.2.1\10.0.2.2\10.0.2.3） </p>
+<p>每个 Node 都使用如下环境变量：</p>
+<pre><code class="language-shell">ETCD_INITIAL_CLUSTER=&quot;node1=http://10.0.2.1:2380,node2=http://10.0.2.2:2380,node3=http://10.0.2.3:2380&quot;
+ETCD_INITIAL_CLUSTER_STATE=new
+</code></pre>
+<p>或者使用如下指令行参数来指定集群成员：</p>
+<pre><code class="language-shell">--initial-cluster node1=http://10.0.2.1:2380,node2=http://10.0.2.2:2380,node3=http://10.0.2.3:2380
+--initial-cluster-state new
+</code></pre>
+<p>初始化集群：</p>
+<p>生成TOKEN：</p>
+<pre><code class="language-shell">ETCD_TOKEN=${uuidgen}
+</code></pre>
+<p>在每一个node上执行：</p>
+<pre><code class="language-shell">$ HOST_IP=`hostname -i`
+
+$ etcd --name &lt;NodeID&gt; --initial-advertise-peer-urls http://$HOST_IP:2380 \
+  --listen-peer-urls http://$HOST_IP:2380 \
+  --listen-client-urls http://$HOST_IP:2379,http://127.0.0.1:2379 \
+  --advertise-client-urls http://$HOST_IP:2380 \
+  --initial-cluster-token $ETCD_TOKEN \ 
+  --initial-cluster node1=http://10.0.2.1:2380,node2=http://10.0.2.2:2380,node3=http://10.0.2.3:2380 \
+  --initial-cluster-state new
+</code></pre>
+<p>注：所有以 --initial-cluster* 开头的选项，在第一次运行（Bootstrap）后都被忽略。</p>
+<h4 id="2">2、公开的发现服务创建集群</h4>
+<p>首先我们需要创建一个集群注册token</p>
+<pre><code class="language-shell">$ curl https://discovery.etcd.io/new?size=3
+https://discovery.etcd.io/a81b5818e67a6ea83e9d4daea5ecbc92
+</code></pre>
+<p>初始化集群：在每一个node上执行</p>
+<pre><code class="language-shell">$ DISCOVERY=`curl https://discovery.etcd.io/new?size=3`
+$ HOST_IP=`hostname -i`
+
+$ etcd --name &lt;NodeID&gt; --initial-advertise-peer-urls http://$HOST_IP:2380 \
+  --listen-peer-urls http://$HOST_IP:2380 \
+  --listen-client-urls http://$HOST_IP:2379,http://127.0.0.1:2379 \
+  --advertise-client-urls http://$HOST_IP:2380 \
+  --discovery ${DISCOVERY} \
+  --initial-cluster-token $ETCD_TOKEN \
+  --initial-cluster-state new
+</code></pre>
+<h2 id="tls">使用TLS加密通信</h2>
+<p>etcd 支持基于 TLS 加密的集群内部、集群外部（客户端与集群之间）的安全通信，每个集群节点都应该拥有被共享 CA 签名的证书：</p>
+<p><strong>生成密钥对、证书签名</strong></p>
+<pre><code class="language-shell">openssl genrsa -out radon.key 2048
+export SAN_CFG=$(printf &quot;\n[SAN]\nsubjectAltName=IP:127.0.0.1,IP:10.0.2.1,DNS:radon.gmem.cc&quot;)
+
+openssl req -new -sha256 -key radon.key -out radon.csr \
+    -subj &quot;/C=CN/ST=BeiJing/O=Gmem Studio/CN=Server Radon&quot; \
+    -reqexts SAN -config &lt;(cat /etc/ssl/openssl.cnf &lt;(echo $SAN_CFG))
+</code></pre>
+<p><strong>执行签名</strong></p>
+<pre><code class="language-shell">openssl x509 -req -sha256 -in radon.csr  -out radon.crt -CA ../ca.crt -CAkey ../ca.key -CAcreateserial -days 3650 \
+     -extensions SAN -extfile &lt;(echo &quot;${SAN_CFG}&quot;)
+</code></pre>
+<p><strong>初始化集群命令需要修改为：</strong></p>
+<pre><code class="language-shell">etcd --name radon --initial-advertise-peer-urls https://10.0.2.1:2380
+  --listen-peer-urls https://10.0.2.1:2380
+  --listen-client-urls https://10.0.2.1:2379,https://127.0.0.1:2379
+  --advertise-client-urls https://10.0.2.1:2380
+  --initial-cluster-token etcd.gmem.cc
+  --initial-cluster node1=http://10.0.2.1:2380,node2=http://10.0.2.2:2380,node3=http://10.0.2.3:2380      # 指定集群成员列表
+  --initial-cluster-state new                                                                              # 初始化新集群时使用  
+  --initial-cluster-state existing                                                                        # 加入已有集群时使用 
+
+  --client-cert-auth  # 客户端 TLS 相关参数
+  --trusted-ca-file=/usr/share/ca-certificates/GmemCA.crt
+  --cert-file=/opt/etcd/cert/radon.crt
+  --key-file=/opt/etcd/cert/radon.key
+
+  --peer-client-cert-auth # 集群内部 TLS 相关参数
+  --peer-trusted-ca-file=/usr/share/ca-certificates/GmemCA.crt
+  --peer-cert-file=/opt/etcd/cert/radon.crt
+  --peer-key-file=/opt/etcd/cert/radon.key
+</code></pre>
+<p><strong>集群健康检测</strong></p>
+<pre><code class="language-shell">ETCDCTL_API=3 /k8s/etcd/bin/etcdctl  endpoint health \
+  --write-out=table \
+  --cacert=/k8s/kubernetes/ssl/ca.pem \
+  --cert=/k8s/kubernetes/ssl/server.pem \
+  --key=/k8s/kubernetes/ssl/server-key.pem \
+  --endpoints=https://192.168.0.108:2379,https://192.168.0.109:2379,https://192.168.0.110:2379
+</code></pre>
+<h2 id="_9">参考资料</h2>
+<p>快速安装指导： http://play.etcd.io/install#top-top</p>
+<p>基本操作api: https://github.com/coreos/etcd/blob/master/Documentation/v2/api.md</p>
+<p>集群配置api: https://github.com/coreos/etcd/blob/master/Documentation/v2/members_api.md</p>
+<p>鉴权认证api: https://github.com/coreos/etcd/blob/master/Documentation/v2/auth_api.md</p>
+<p>配置项：https://github.com/coreos/etcd/blob/master/Documentation/op-guide/configuration.md</p>
+<p>https://coreos.com/etcd/docs/latest/runtime-configuration.html
+https://coreos.com/etcd/docs/latest/clustering.html
+https://coreos.com/etcd/docs/latest/runtime-configuration.html
+https://coreos.com/etcd/docs/latest/
+https://coreos.com/etcd/docs/latest/admin_guide.html#disaster-recovery</p>
+              
+            </div>
+          </div><footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+      <p>Copyright @2021 Haiker</p>
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+        <span>
+          <a href="https://github.com/ihaiker/ni.renzhen.la" class="fa fa-github" style="color: #fcfcfc"> GitHub</a>
+        </span>
+    
+    
+    
+  </span>
+</div>
+    <script>var base_url = '../../..';</script>
+    <script src="../../../js/theme_extra.js" defer></script>
+    <script src="../../../js/theme.js" defer></script>
+      <script src="../../../search/main.js" defer></script>
+    <script defer>
+        window.onload = function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        };
+    </script>
+
+</body>
+</html>

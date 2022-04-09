@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="author" content="Haiker" /><link rel="canonical" href="https://ni.renzhen.la/database/mysql/varchar_length/" />
+      <link rel="shortcut icon" href="../../../img/favicon.ico" />
+    <title>mysql varchar  length 对性能影响分析 - Haiker技术博客</title>
+    <link rel="stylesheet" href="../../../css/theme.css" />
+    <link rel="stylesheet" href="../../../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/styles/github.min.css" />
+        <link href="../../../extra.css" rel="stylesheet" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "mysql varchar  length \u5bf9\u6027\u80fd\u5f71\u54cd\u5206\u6790";
+        var mkdocs_page_input_path = "database/mysql/varchar_length.md";
+        var mkdocs_page_url = "/database/mysql/varchar_length/";
+      </script>
+    
+    <script src="../../../js/jquery-3.6.0.min.js" defer></script>
+    <!--[if lt IE 9]>
+      <script src="../../../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/highlight.min.js"></script>
+      <script>hljs.initHighlightingOnLoad();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href="../../.." class="icon icon-home"> Haiker技术博客
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../../template/">效果不错的HTML</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../..">主页</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="" href="../../../language">编程语言</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="" href="../../../cloud">云服务</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="" href="../../../framework">framework</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="" href="../../../knowledge">knowledge</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="" href="../../../management">管理工具</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="" href="../..">数据库</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="" href="../../../tools">工具</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../../about/">关于我们</a>
+                </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../..">Haiker技术博客</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../../.." class="icon icon-home" alt="Docs"></a> &raquo;</li><li>mysql varchar  length 对性能影响分析</li>
+    <li class="wy-breadcrumbs-aside">
+        <a href="https://github.com/ihaiker/ni.renzhen.la/edit/master/docs/database/mysql/varchar_length.md"
+          class="icon icon-github"> Edit on GitHub</a>
+    </li>
+  </ul>
+  <hr/>
+</div>
+
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <p>1.MySQL建立索引时如果没有限制索引的大小，索引长度会默认采用的该字段的长度，也就是说varchar(20)和varchar(255)对应的索引长度分别为20<em>3(utf-8)(+2+1),255</em>3(utf-8)(+2+1)，其中"+2"用来存储长度信息，“+1”用来标记是否为空，加载索引信息时用varchar(255)类型会占用更多的内存； （备注：当字段定义为非空的时候，是否为空的标记将不占用字节）例如，测试sql(InnoDB引擎)如下:</p>
+<pre><code class="language-sql">CREATE DATABASE TestDataBase;
+USE TestDataBase;
+
+CREATE TABLE ABC (
+    `id` int(11) DEFAULT null,
+  `name` varchar(20) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT charset=utf8;
+
+ALTER TABLE `ABC` ADD INDEX `nameIndex`(`name`);
+explain select name from ABC;
+
+alter table ABC modify name varchar(255);
+explain select name from ABC;
+</code></pre>
+<p>varchr(10)变长字段且允许NULL:10*(Character Set：utf8=3,gbk=2,latin1=1)+1(NULL)+2(变长字段) </p>
+<p>varchr(10)变长字段且不允许NULL:10*(Character Set：utf8=3,gbk=2,latin1=1)+2(变长字段) </p>
+<p>char(10)固定字段且允许NULL:10*(Character Set：utf8=3,gbk=2,latin1=1)+1(NULL) char(10)固定</p>
+<p>字段且允许NULL:10*(Character Set：utf8=3,gbk=2,latin1=1)根据这个值，就可以判断索引使用情况，特别是在组合索引的时候，判断所有的索引字段都被查询用到。</p>
+<p>2.varchar(20)与varchar(255)都是保持可变的字符串，当使用ROW_FORMAT=FIXED创建MyISAM表时，会为每行使用固定的长度空间，这样设置不同的varchar长度值时，存储相同数据所占用的空间是不一样。</p>
+<p>通常情况下使用varchar(20)和varchar(255)保持'hello'占用的空间都是一样的，但使用长度较短的列却有巨大的优势。较大的列使用更多的内存，因为MySQL通常会分配固定大小的内存块来保存值，这对排序或使用基于内存的临时表尤其不好。同样的事情也会发生在使用文件排序或者基于磁盘的临时表的时候。</p>
+              
+            </div>
+          </div><footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+      <p>Copyright @2021 Haiker</p>
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+        <span>
+          <a href="https://github.com/ihaiker/ni.renzhen.la" class="fa fa-github" style="color: #fcfcfc"> GitHub</a>
+        </span>
+    
+    
+    
+  </span>
+</div>
+    <script>var base_url = '../../..';</script>
+    <script src="../../../js/theme_extra.js" defer></script>
+    <script src="../../../js/theme.js" defer></script>
+      <script src="../../../search/main.js" defer></script>
+    <script defer>
+        window.onload = function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        };
+    </script>
+
+</body>
+</html>
